@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Psych Episode Picker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rock+Salt&display=swap" rel="stylesheet" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body,
+      html {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding-top: 2rem;
+        background: #cffc3f;
+        font-family: 'Rock Salt', sans-serif;
+        text-align: center;
+        position: relative;
+      }
+      button {
+        width: 100%;
+        max-width: 500px;
+        font-size: 2rem;
+        background: #007849;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 0.5rem;
+        height: 3.5rem;       
+        line-height: 3.5rem;  
+        overflow: hidden;     
+      }
+      .episode-info {
+        font-size: 2rem;
+        color: #333;
+        width: 80%;
+        max-width: 500px;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.85);
+        border-radius: 0.5rem;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin: 1rem 0 2rem 0;
+        display: none;
+        word-wrap: break-word; 
+      }
+      .history {
+        position: absolute;
+        bottom: 2rem;
+        width: 90%;
+        left: 50%;
+        transform: translateX(-50%);
+        max-height: 150px;
+        overflow-y: auto;
+        background: rgba(0, 120, 73, 0.1);
+        padding: 1rem;
+        font-size: 1rem;
+        text-align: left;
+        display: none;
+      }
+      .history p {
+        margin: 0.2rem 0;
+      }
+    </style>
+  </head>   
+<body>
+  <button id="btn">Psych Me Out Again!</button>
+  <div class="episode-info" id="info" style="display:none;">
+    <p id="details"></p>
+    <p id="title"></p>
+  </div>
+  <div class="history" id="history" style="display:none;">
+    <h3>Previously picked:</h3>
+    <div id="historyList"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script>
+    let episodes = [
+      { season: 1, episode: 1, title: "Pilot" },
+      { season: 1, episode: 2, title: "Spellingg Bee" },
+      { season: 1, episode: 3, title: "Speak Now or Forever Hold Your Piece" },
+      { season: 1, episode: 4, title: "Woman Seeking Dead Husband: Smokers Okay, No Pets" },
+      { season: 1, episode: 5, title: "9 Lives" },
+      { season: 1, episode: 6, title: "Weekend Warriors" },
+      { season: 1, episode: 7, title: "Who Ya Gonna Call?" },
+      { season: 1, episode: 8, title: "Shawn vs. the Red Phantom" },
+      { season: 1, episode: 9, title: "Forget Me Not" },
+      { season: 1, episode: 10, title: "From the Earth to the Starbucks" },
+      { season: 1, episode: 11, title: "He Loves Me, He Loves Me Not, He Loves Me, Oops He's Dead!" },
+      { season: 1, episode: 12, title: "Cloudy... Chance of Murder" },
+      { season: 1, episode: 13, title: "Game, Set... Muuurder?" },
+      { season: 1, episode: 14, title: "Poker? I Barely Know Her" },
+      { season: 1, episode: 15, title: "Scary Sherry: Bianca's Toast" },
+      
+      {season: 2, episode: 1, title: "American Duos"},
+      {season: 2, episode: 2, title: "65 Million Years Off"},
+      {season: 2, episode: 3, title: "Psy vs. Psy"},
+      {season: 2, episode: 4, title: "Zero to Murder in Sixty Seconds"},
+      {season: 2, episode: 5, title: "And Down the Stretch Comes Murder"},
+      {season: 2, episode: 6, title: "Meat Is Murder, But Murder Is Also Murder"},
+      {season: 2, episode: 7, title: "If You're So Smart, Then Why Are You Dead?"},
+      {season: 2, episode: 8, title: "Rob-a-Bye Baby"},
+      {season: 2, episode: 9, title: "Bounty Hunters!"},
+      {season: 2, episode: 10, title: "Gus's Dad May Have Killed an Old Guy!"},
+      {season: 2, episode: 11, title: "There's Something About Mira"},
+      {season: 2, episode: 12, title: "The Old and the Restless"},
+      {season: 2, episode: 13, title: "Lights, Camera... Homicidio"},
+      {season: 2, episode: 14, title: "Dis-Lodged"},
+      {season: 2, episode: 15, title: "Black and Tan: A Crime of Fashion"},
+      {season: 2, episode: 16, title: "Shawn (and Gus) of the Dead"},
+
+      {season: 3, episode: 1, title: "Ghosts"},
+      {season: 3, episode: 2, title: "Murder?... Anyone?... Anyone?... Bueller?"},
+      {season: 3, episode: 3, title: "Daredevils!"},
+      {season: 3, episode: 4, title: "The Greatest Adventure in the History of Basic Cable"},
+      {season: 3, episode: 5, title: "Disco Didn't Die. It Was Murdered!"},
+      {season: 3, episode: 6, title: "There Might Be Blood"},
+      {season: 3, episode: 7, title: "Talk Derby to Me"},
+      {season: 3, episode: 8, title: "Gus Walks into a Bank"},
+      {season: 3, episode: 9, title: "Christmas Joy"},
+      {season: 3, episode: 10, title: "Six Feet Under the Sea"},
+      {season: 3, episode: 11, title: "Lassie Did a Bad, Bad Thing"},
+      {season: 3, episode: 12, title: "Earth, Wind and... Wait for It"},
+      {season: 3, episode: 13, title: "Any Given Friday Night at 10PM, 9PM Central"},
+      {season: 3, episode: 14, title: "Truer Lies"},
+      {season: 3, episode: 15, title: "Tuesday the 17th"},
+      {season: 3, episode: 16, title: "An Evening with Mr. Yang"},
+
+      {season: 4, episode: 1, title: "Extradition: British Columbia"},
+      {season: 4, episode: 2, title: "He Dead"},
+      {season: 4, episode: 3, title: "High Noon-ish"},
+      {season: 4, episode: 4, title: "The Devil's in the Details... and in the Upstairs Bedroom"},
+      {season: 4, episode: 5, title: "Shawn Gets the Yips"},
+      {season: 4, episode: 6, title: "Bollywood Homicide"},
+      {season: 4, episode: 7, title: "High Top Fade-Out"},
+      {season: 4, episode: 8, title: "Let's Get Hairy"},
+      {season: 4, episode: 9, title: "Shawn Takes a Shot in the Dark"},
+      {season: 4, episode: 10, title: "You Can't Handle This Episode"},
+      {season: 4, episode: 11, title: "Thrill Seekers and Hell Raisers"},
+      {season: 4, episode: 12, title: "A Very Juliet Episode"},
+      {season: 4, episode: 13, title: "Death Is in the Air"},
+      {season: 4, episode: 14, title: "Think Tank"},
+      {season: 4, episode: 15, title: "The Head, the Tail, the Whole Damn Episode"},
+      {season: 4, episode: 16, title: "Mr. Yin Presents..."},
+
+      {season: 5, episode: 1, title: "Romeo and Juliet and Juliet"},
+      {season: 5, episode: 2, title: "Feet Don't Kill Me Now"},
+      {season: 5, episode: 3, title: "Not Even Close... Encounters"},
+      {season: 5, episode: 4, title: "Chivalry Is Not Dead... But Someone Is"},
+      {season: 5, episode: 5, title: "Shawn and Gus in Drag (Racing)"},
+      {season: 5, episode: 6, title: "Viagra Falls"},
+      {season: 5, episode: 7, title: "Ferry Tale"},
+      {season: 5, episode: 8, title: "Shawn 2.0"},
+      {season: 5, episode: 9, title: "One, Maybe Two, Ways Out"},
+      {season: 5, episode: 10, title: "Extradition II: The Actual Extradition Part"},
+      {season: 5, episode: 11, title: "In Plain Fright"},
+      {season: 5, episode: 12, title: "Dual Spires"},
+      {season: 5, episode: 13, title: "We'd Like to Thank the Academy"},
+      {season: 5, episode: 14, title: "The Polarizing Express"},
+      {season: 5, episode: 15, title: "Dead Bear Walking"},
+      {season: 5, episode: 16, title: "Yang 3 in 2D"},
+
+      {season: 6, episode: 1, title: "Shawn Rescues Darth Vader"},
+      {season: 6, episode: 2, title: "Last Night Gus"},
+      {season: 6, episode: 3, title: "This Episode Sucks"},
+      {season: 6, episode: 4, title: "The Amazing Psych-Man & Tap Man, Issue #2"},
+      {season: 6, episode: 5, title: "Dead Man's Curveball"},
+      {season: 6, episode: 6, title: "Shawn, Interrupted"},
+      {season: 6, episode: 7, title: "In for a Penny..."},
+      {season: 6, episode: 8, title: "The Tao of Gus"},
+      {season: 6, episode: 9, title: "Neil Simon's Lover's Retreat"},
+      {season: 6, episode: 10, title: "Indiana Shawn and the Temple of the Kinda Crappy, Rusty Old Dagger"},
+      {season: 6, episode: 11, title: "Heeeeere's Lassie"},
+      {season: 6, episode: 12, title: "Shawn and the Real Girl"},
+      {season: 6, episode: 13, title: "Let's Doo-Wop It Again"},
+      {season: 6, episode: 14, title: "Autopsy Turvy"},
+      {season: 6, episode: 15, title: "True Grits"},
+      {season: 6, episode: 16, title: "Santabarbaratown"},
+
+      {season: 7, episode: 1, title: "Santabarbaratown 2"},
+      {season: 7, episode: 2, title: "Juliet Takes a Luvvah"},
+      {season: 7, episode: 3, title: "Lassie Jerky"},
+      {season: 7, episode: 4, title: "No Country for Two Old Men"},
+      {season: 7, episode: 5, title: "100 Clues"},
+      {season: 7, episode: 6, title: "Cirque du Soul"},
+      {season: 7, episode: 7, title: "Deez Nups"},
+      {season: 7, episode: 8, title: "Right Turn or Left for Dead"},
+      {season: 7, episode: 9, title: "Juliet Wears the Pantsuit"},
+      {season: 7, episode: 10, title: "The Santa Barbarian Candidate"},
+      {season: 7, episode: 11, title: "Office Space"},
+      {season: 7, episode: 12, title: "Dead Air"},
+      {season: 7, episode: 13, title: "Nip and Suck It"},
+      {season: 7, episode: 14, title: "No Trout About It"},
+
+      {season: 8, episode: 1, title: "Lock, Stock, Some Smoking Barrels and Burton Guster's Goblet of Fire"},
+      {season: 8, episode: 2, title: "S.E.I.Z.E. the Day"},
+      {season: 8, episode: 3, title: "Remake A.K.A. Cloudy... With a Chance of Improvement"},
+      {season: 8, episode: 4, title: "Someone's Got a Woody"},
+      {season: 8, episode: 5, title: "Cog Blocked"},
+      {season: 8, episode: 6, title: "1967: A Psych Odyssey"},
+      {season: 8, episode: 7, title: "Shawn and Gus Truck Things Up"},
+      {season: 8, episode: 8, title: "A Touch of Sweevil"},
+      {season: 8, episode: 9, title: "A Nightmare on State Street"},
+      {season: 8, episode: 10, title: "The Break-Up"}
+
+    ];
+
+    let history = [];
+
+    function pickEpisode() {
+      const available = episodes.filter(ep => !history.some(h => h.season === ep.season && h.episode === ep.episode));
+      const pool = available.length ? available : episodes;
+      const choice = pool[Math.floor(Math.random() * pool.length)];
+      history.unshift(choice);
+      if (history.length > 10) history.pop();
+      return choice;
+    }
+
+    document.getElementById('btn').addEventListener('click', () => {
+      if (!episodes.length) {
+        alert("No episodes found.");
+        return;
+      }
+      const ep = pickEpisode();
+      document.getElementById('details').textContent = `Season ${ep.season}, Episode ${ep.episode}`;
+      document.getElementById('title').textContent = ep.title;
+      document.getElementById('info').style.display = 'block';
+      document.getElementById('history').style.display = 'block';
+
+      const histDiv = document.getElementById('historyList');
+      histDiv.innerHTML = '';
+      history.forEach(h => {
+        const p = document.createElement('p');
+        p.textContent = `S${h.season}E${h.episode}: ${h.title}`;
+        histDiv.appendChild(p);
+      });
+
+      confetti({particleCount:150, spread:100, origin:{ y:0.6 }});
+    });
+  </script>
+</body>
+</html>
